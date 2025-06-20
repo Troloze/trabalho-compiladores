@@ -51,4 +51,5 @@ Module.symvers
 Mkfile.old
 dkms.conf
 *.tab.c
+*.tab.h
 *.yy.c
