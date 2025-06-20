@@ -87,8 +87,8 @@ int                     {
                             return ID;
                         }
 {COMENTARIO}            {}
-{ASPA}                  {printf("ERRO NA LINHA %d: CADEIA DE CARACTERES OCUPA MAIS DE UMA LINHA OU NAO TERMINA.\n", yylineno); return ERROR;}
-{ABRE_COMENTARIO}       {printf("ERROR NA LINHA %d: COMENTARIO NAO TERMINA.\n", yylineno); return ERROR;}
+{ASPA}                  {printf("ERRO NA LINHA %d: CADEIA DE CARACTERES OCUPA MAIS DE UMA LINHA OU NAO TERMINA.\n", yylineno); return -1;}
+{ABRE_COMENTARIO}       {printf("ERROR NA LINHA %d: COMENTARIO NAO TERMINA.\n", yylineno); return -1;}
 {WHITESPACE}            /* Não fazer nada */
-.                       {printf("ERRO NA LINHA: %d: CARACTERE INVALIDO.\n", yylineno); return ERROR;}
+.                       {printf("ERRO NA LINHA: %d: CARACTERE INVALIDO.\n", yylineno); return -1;}
 %%

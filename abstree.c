@@ -50,6 +50,12 @@ void* safeMalloc(size_t size) {
     return ret;
 }
 
+void* safeCalloc(size_t count, size_t size) {
+    void* ret = calloc(count, size);
+    addToMem(ret);
+    return ret;
+}
+
 void* safeRealloc(void* ptr, size_t size) {
     void* ret = realloc(ptr, size);
     replaceFromMem(ptr, ret);
@@ -105,7 +111,7 @@ var* allocVar() {
 }
 
 var* declVar(var* in, char * id) {
-    char * newId = calloc(strlen(id) + 1, sizeof(char));
+    char * newId = safeCalloc(strlen(id) + 1, sizeof(char));
     strcpy(newId, id);
     in->ids = safeRealloc(in->ids, sizeof(char*) * (in->count + 1));
     in->ids[in->count++] = newId;
@@ -120,7 +126,7 @@ params* allocParams() {
 }
 
 params* addParam(params* in, int type, char* id) {
-    char* newStr = calloc(strlen(id) + 1, sizeof(char));
+    char* newStr = safeCalloc(strlen(id) + 1, sizeof(char));
     strcpy(newStr, id);
     in->param = safeRealloc(in->param, sizeof(param*) * (in->count + 1));
     param* newPar = safeMalloc(sizeof(param));
@@ -145,7 +151,7 @@ declfv* declfvAssignVar(declfv* in, int type, var* varIds) {
 }
 
 declfv* declfvAssignFunc(declfv* in, int type, char * id, func* newFunc) {
-    char* newId = calloc(strlen(id) + 1, sizeof(char));
+    char* newId = safeCalloc(strlen(id) + 1, sizeof(char));
     newFunc->id = newId;
     newFunc->type = type;
     strcpy(newId, id);
@@ -185,7 +191,7 @@ comm* newComm(commType type, void* expr1, void* comm1, void* comm2) {
     {
     case WRITE_STR_COMM:
     case READ_COMM:
-        newStr = calloc(strlen((char*) expr1) + 1, sizeof(char));
+        newStr = safeCalloc(strlen((char*) expr1) + 1, sizeof(char));
         strcpy(newStr, (char*) expr1);
         ret->idStr = newStr;
         break; 
@@ -235,7 +241,7 @@ prim* newPrim(primType type, char * id, exprList* param, expr* _expr, int num, c
     case FUNC_CALL:
         ret->exprs = param;
     case VAR:
-        newStr = calloc(strlen(id) + 1, sizeof(char));
+        newStr = safeCalloc(strlen(id) + 1, sizeof(char));
         strcpy(newStr, id);
         ret->name = newStr;
         ret->name = newStr;

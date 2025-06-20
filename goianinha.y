@@ -71,7 +71,6 @@
 
 %token NEWLINE
 
-%token ERROR
 
 %type<block> declProg 
 %type<declfv> declFuncVar

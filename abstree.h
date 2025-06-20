@@ -148,6 +148,7 @@ typedef struct prim {
     };
 } prim;
 
+// Não faz parte da árvore abstrata, mas é usado para o gerenciamento de memória dela
 typedef struct safeMemory {
     int size;
     int maxSize;
