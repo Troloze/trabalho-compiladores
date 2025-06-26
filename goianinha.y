@@ -9,7 +9,7 @@
 
 %union {
     int num;
-    char sym;
+    unsigned char sym;
     char* str;
     program* program;
     declfv* declfv;
@@ -93,7 +93,7 @@ input:
 ;
 
 declFuncVar: 
-      type ID declVar SEMICOLON declFuncVar {$$ = declfvAssignVar($5, $1, declVar($3, $2));}
+      type ID declVar SEMICOLON declFuncVar {$$ = declfvAssignVar($5, $1, declVar($3, $2, yylineno));}
     | type ID declFunc declFuncVar {$$ = declfvAssignFunc($4, $1, $2, $3);}
     | /*epsilon*/ {$$ = declfvCall();}
 ;
@@ -103,12 +103,12 @@ declProg:
 ;
 
 declVar: 
-      COMMA ID declVar {$$ = declVar($3, $2);}
+      COMMA ID declVar {$$ = declVar($3, $2, yylineno);}
     | /*epsilon*/ {$$ = allocVar();}
 ;
 
 declFunc: 
-      PAR_OPEN paramList PAR_CLOSE block {$$ = declFunc($2, $4);}
+      PAR_OPEN paramList PAR_CLOSE block {$$ = declFunc($2, $4, yylineno);}
 ;
 
 paramList: 
@@ -117,8 +117,8 @@ paramList:
 ;
 
 paramListCont: 
-      type ID {$$ = addParam($$ = allocParams(), $1, $2);}
-    | type ID COMMA paramListCont {$$ = addParam($4, $1, $2);}
+      type ID {$$ = addParam(allocParams(), $1, $2, yylineno);}
+    | type ID COMMA paramListCont {$$ = addParam($4, $1, $2, yylineno);}
 ;
 
 block: 
@@ -126,7 +126,7 @@ block:
 ;
 
 declVarList: 
-      type ID declVar SEMICOLON declVarList {$$ = assignVar($5, $1, declVar($3, $2));}
+      type ID declVar SEMICOLON declVarList {$$ = assignVar($5, $1, declVar($3, $2, yylineno));}
     | /*epsilon*/ {$$ = allocVars();}
 ;
 
@@ -141,85 +141,85 @@ commandList:
 ;
 
 command: 
-      SEMICOLON {}
-    | expr SEMICOLON {$$ = newComm(BASE_COMM, $1, NULL, NULL);}
-    | RETURN expr SEMICOLON {$$ = newComm(RETURN_COMM, $2, NULL, NULL);}
-    | READ ID SEMICOLON {$$ = newComm(READ_COMM, $2, NULL, NULL);}
-    | WRITE STRING SEMICOLON {$$ = newComm(WRITE_STR_COMM, $2, NULL, NULL);}
-    | WRITE expr SEMICOLON {$$ = newComm(WRITE_EXPR_COMM, $2, NULL, NULL);}
-    | NEWLINE SEMICOLON {$$ = newComm(NEWLINE_COMM, NULL, NULL, NULL);}
-    | IF PAR_OPEN expr PAR_CLOSE THEN command {$$ = newComm(IF_COMM, $3, $6, NULL);}
-    | IF PAR_OPEN expr PAR_CLOSE THEN command ELSE command {$$ = newComm(IF_ELSE_COMM, $3, $6, $8);}
-    | WHILE PAR_OPEN expr PAR_CLOSE DO command {$$ = newComm(WHILE_COMM, $3, $6, NULL);}
-    | block {$$ = newComm(BLOCK_COMM, $1, NULL, NULL);}
+      SEMICOLON {$$ = NULL}
+    | expr SEMICOLON {$$ = newComm(BASE_COMM, $1, NULL, NULL, yylineno);}
+    | RETURN expr SEMICOLON {$$ = newComm(RETURN_COMM, $2, NULL, NULL, yylineno);}
+    | READ ID SEMICOLON {$$ = newComm(READ_COMM, $2, NULL, NULL, yylineno);}
+    | WRITE STRING SEMICOLON {$$ = newComm(WRITE_STR_COMM, $2, NULL, NULL, yylineno);}
+    | WRITE expr SEMICOLON {$$ = newComm(WRITE_EXPR_COMM, $2, NULL, NULL, yylineno);}
+    | NEWLINE SEMICOLON {$$ = newComm(NEWLINE_COMM, NULL, NULL, NULL, yylineno);}
+    | IF PAR_OPEN expr PAR_CLOSE THEN command {$$ = newComm(IF_COMM, $3, $6, NULL, yylineno);}
+    | IF PAR_OPEN expr PAR_CLOSE THEN command ELSE command {$$ = newComm(IF_ELSE_COMM, $3, $6, $8, yylineno);}
+    | WHILE PAR_OPEN expr PAR_CLOSE DO command {$$ = newComm(WHILE_COMM, $3, $6, NULL, yylineno);}
+    | block {$$ = newComm(BLOCK_COMM, $1, NULL, NULL, yylineno);}
 ;
 
 expr: 
-      ID ASIGN_OP expr {$$ = newExpr(ASS_OPTYPE, newExprFromID($1), $3, NULL);}
+      ID ASIGN_OP expr {$$ = newExpr(ASS_OPTYPE, newExprFromID($1, yylineno), $3, NULL, yylineno);}
     | orExpr {$$ = $1;}
 ;
 
 orExpr:
-      orExpr OR_OP andExpr {$$ = newExpr(OR_OPTYPE, $1, $3, NULL);}
+      orExpr OR_OP andExpr {$$ = newExpr(OR_OPTYPE, $1, $3, NULL, yylineno);}
     | andExpr {$$ = $1;}
 ;
 
 andExpr:
-      andExpr AND_OP eqExpr {$$ = newExpr(AND_OPTYPE, $1, $3, NULL);}
+      andExpr AND_OP eqExpr {$$ = newExpr(AND_OPTYPE, $1, $3, NULL, yylineno);}
     | eqExpr {$$ = $1}
 ;
 
 eqExpr:
-      eqExpr COMP_EQ desigExpr {$$ = newExpr(EQ_OPTYPE, $1, $3, NULL);}
-    | eqExpr COMP_NE desigExpr {$$ = newExpr(NEQ_OPTYPE, $1, $3, NULL);}
+      eqExpr COMP_EQ desigExpr {$$ = newExpr(EQ_OPTYPE, $1, $3, NULL, yylineno);}
+    | eqExpr COMP_NE desigExpr {$$ = newExpr(NEQ_OPTYPE, $1, $3, NULL, yylineno);}
     | desigExpr {$$ = $1}
 ;
 
 desigExpr:
-      desigExpr COMP_LT addExpr {$$ = newExpr(LT_OPTYPE, $1, $3, NULL);}
-    | desigExpr COMP_GT addExpr {$$ = newExpr(GT_OPTYPE, $1, $3, NULL);}
-    | desigExpr COMP_LE addExpr {$$ = newExpr(LE_OPTYPE, $1, $3, NULL);}
-    | desigExpr COMP_GE addExpr {$$ = newExpr(GE_OPTYPE, $1, $3, NULL);}
+      desigExpr COMP_LT addExpr {$$ = newExpr(LT_OPTYPE, $1, $3, NULL, yylineno);}
+    | desigExpr COMP_GT addExpr {$$ = newExpr(GT_OPTYPE, $1, $3, NULL, yylineno);}
+    | desigExpr COMP_LE addExpr {$$ = newExpr(LE_OPTYPE, $1, $3, NULL, yylineno);}
+    | desigExpr COMP_GE addExpr {$$ = newExpr(GE_OPTYPE, $1, $3, NULL, yylineno);}
     | addExpr {$$ = $1}
 ;
 
 addExpr:
-      addExpr PLUS_SIGN multExpr {$$ = newExpr(ADD_OPTYPE, $1, $3, NULL);}
-    | addExpr MINUS_SIGN multExpr {$$ = newExpr(SUB_OPTYPE, $1, $3, NULL);}
+      addExpr PLUS_SIGN multExpr {$$ = newExpr(ADD_OPTYPE, $1, $3, NULL, yylineno);}
+    | addExpr MINUS_SIGN multExpr {$$ = newExpr(SUB_OPTYPE, $1, $3, NULL, yylineno);}
     | multExpr {$$ = $1} 
 ;
 
 multExpr:
-      multExpr MULT_SIGN unitExpr {$$ = newExpr(MULT_OPTYPE, $1, $3, NULL);}
-    | multExpr DIV_SIGN unitExpr {$$ = newExpr(DIV_OPTYPE, $1, $3, NULL);}
+      multExpr MULT_SIGN unitExpr {$$ = newExpr(MULT_OPTYPE, $1, $3, NULL, yylineno);}
+    | multExpr DIV_SIGN unitExpr {$$ = newExpr(DIV_OPTYPE, $1, $3, NULL, yylineno);}
     | unitExpr {$$ = $1}
 ;
 
 unitExpr:
-      MINUS_SIGN primExpr {$$ = newExpr(NEG_OPTYPE, NULL, NULL, $2);}
-    | NOT_OP primExpr {$$ = newExpr(NOT_OPTYPE, NULL, NULL, $2);}
-    | primExpr {$$ = newExpr(PRIM_OPTYPE, NULL, NULL, $1)}
+      MINUS_SIGN primExpr {$$ = newExpr(NEG_OPTYPE, NULL, NULL, $2, yylineno);}
+    | NOT_OP primExpr {$$ = newExpr(NOT_OPTYPE, NULL, NULL, $2, yylineno);}
+    | primExpr {$$ = newExpr(PRIM_OPTYPE, NULL, NULL, $1, yylineno)}
 ;
 
 primExpr: 
-      ID PAR_OPEN exprList PAR_CLOSE {$$ = newPrim(FUNC_CALL, $1, $3, NULL, 0, 0);}
-    | ID PAR_OPEN PAR_CLOSE {$$ = newPrim(FUNC_CALL, $1, NULL, NULL, 0, 0);}
-    | ID {$$ = newPrim(VAR, $1, NULL, NULL, 0, 0);}
-    | CHAR {$$ = newPrim(CAR_CONST, NULL, NULL, NULL, 0, $1);}
-    | NUMBER {$$ = newPrim(INT_CONST, NULL, NULL, NULL, $1, 0);}
-    | PAR_OPEN expr PAR_CLOSE {$$ = newPrim(PAR_EXPR, NULL, NULL, $2, 0, 0);}
+      ID PAR_OPEN exprList PAR_CLOSE {$$ = newPrim(FUNC_CALL, $1, $3, NULL, 0, 0, yylineno);}
+    | ID PAR_OPEN PAR_CLOSE {$$ = newPrim(FUNC_CALL, $1, NULL, NULL, 0, 0, yylineno);}
+    | ID {$$ = newPrim(VAR, $1, NULL, NULL, 0, 0, yylineno);}
+    | CHAR {$$ = newPrim(CAR_CONST, NULL, NULL, NULL, 0, $1, yylineno);}
+    | NUMBER {$$ = newPrim(INT_CONST, NULL, NULL, NULL, $1, 0, yylineno);}
+    | PAR_OPEN expr PAR_CLOSE {$$ = newPrim(PAR_EXPR, NULL, NULL, $2, 0, 0, yylineno);}
 ;
 
 exprList:
-      expr {$$ = stackExpr(allocExprs(), $1);} 
-    | exprList COMMA expr {$$ = stackExpr($1, $3);}
+      expr {$$ = stackExpr(allocExprs(yylineno), $1);} 
+    | expr COMMA exprList   {$$ = stackExpr($3, $1);}
 ;
 
 %%
 
 
 int yyerror(const char* s) {
-    printf("ERROR ON LINE %d: %s\n", yylineno, s);
+    printf("ERROR NA LINHA %d: %s\n", yylineno, s);
     is_error = 1;
     return 0;
 }

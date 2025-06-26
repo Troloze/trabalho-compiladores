@@ -1,3 +1,5 @@
+#ifndef ATT_COMP_ABSTREE
+#define ATT_COMP_ABSTREE
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,6 +75,7 @@ typedef struct vars {
 } vars;
 
 typedef struct var {
+    int line;
     int type;
     int count;
     char** ids;
@@ -84,6 +87,7 @@ typedef struct funcs {
 } funcs;
 
 typedef struct func {
+    int line;
     int type;
     char* id;
     params* params;
@@ -96,6 +100,7 @@ typedef struct params {
 } params;
 
 typedef struct param {
+    int line;
     int type;
     char * id;
 } param;
@@ -111,6 +116,7 @@ typedef struct comms {
 } comms;
 
 typedef struct comm {
+    int line;
     int type;
     union {
         expr * expr;
@@ -122,6 +128,7 @@ typedef struct comm {
 } comm;
 
 typedef struct expr {
+    int line;
     int type;
     union {
         prim* prim;
@@ -131,11 +138,13 @@ typedef struct expr {
 } expr;
 
 typedef struct exprList {
+    int line;
     int count;
     expr** expr;
 } exprList;
 
 typedef struct prim {
+    int line;
     int type;
     union {
         int iValue;
@@ -160,21 +169,23 @@ program* getAbsTree();
 void programCall(declfv * dfv, block * blk);
 declfv* declfvCall();
 var* allocVar();
-var* declVar(var* in, char * id);
+var* declVar(var* in, char * id, int line);
 vars* allocVars();
 vars* assignVar(vars* in, int type, var * new);
-func* declFunc(params* params, block* blk);
+func* declFunc(params* params, block* blk, int line);
 params* allocParams();
-params* addParam(params* in, int type, char* id);
+params* addParam(params* in, int type, char* id, int line);
 declfv* declfvAssignVar(declfv* in, int type, var* varIds);
 declfv* declfvAssignFunc(declfv* in, int type, char * id, func* newFunc);
 block* allocBlock(vars* varList, comms * commList);
 comms* allocComms();
 comms* assignComm(comms* in, comm* new);
-comm* newComm(commType type, void* expr1, void* comm1, void* comm2);
-expr* newExpr(opType type, expr* expr1, expr* expr2, prim* prim1);
-expr* newExprFromID(char* id);
-exprList* allocExprs();
+comm* newComm(commType type, void* expr1, void* comm1, void* comm2, int line);
+expr* newExpr(opType type, expr* expr1, expr* expr2, prim* prim1, int line);
+expr* newExprFromID(char* id, int line);
+exprList* allocExprs(int line);
 exprList* stackExpr(exprList* in, expr* _expr);
-prim* newPrim(primType type, char * id, exprList* param, expr* _expr, int num, char c);
+prim* newPrim(primType type, char * id, exprList* param, expr* _expr, int num, char c, int line);
 void printProg();
+
+#endif

@@ -110,9 +110,10 @@ var* allocVar() {
     return ret;
 }
 
-var* declVar(var* in, char * id) {
+var* declVar(var* in, char * id, int line) {
     char * newId = safeCalloc(strlen(id) + 1, sizeof(char));
     strcpy(newId, id);
+    in->line = line;
     in->ids = safeRealloc(in->ids, sizeof(char*) * (in->count + 1));
     in->ids[in->count++] = newId;
     return in;
@@ -125,19 +126,21 @@ params* allocParams() {
     return ret;
 }
 
-params* addParam(params* in, int type, char* id) {
+params* addParam(params* in, int type, char* id, int line) {
     char* newStr = safeCalloc(strlen(id) + 1, sizeof(char));
     strcpy(newStr, id);
     in->param = safeRealloc(in->param, sizeof(param*) * (in->count + 1));
     param* newPar = safeMalloc(sizeof(param));
-    newPar->id = id;
+    newPar->line = line;
+    newPar->id = newStr;
     newPar->type = type;
-    in->param[in->count] = newPar;
+    in->param[in->count++] = newPar;
     return in;
 }
 
-func* declFunc(params* params, block* blk) {
+func* declFunc(params* params, block* blk, int line) {
     func* ret = safeMalloc(sizeof(func));
+    ret->line = line;
     ret->params = params;
     ret->block = blk;
     return ret;
@@ -175,17 +178,19 @@ comms* allocComms() {
 }
 
 comms* assignComm(comms* in, comm* new) {
+    if (new == NULL) return in;
     in->comm = safeRealloc(in->comm, sizeof(comm*) * (in->count + 1));
     in->comm[in->count++] = new;
     return in;
 }
 
-comm* newComm(commType type, void* expr1, void* comm1, void* comm2) {
+comm* newComm(commType type, void* expr1, void* comm1, void* comm2, int line) {
     comm* ret = safeMalloc(sizeof(comm));
     char * newStr;
     ret->type = type;
     ret->comm1 = comm1;
     ret->comm2 = comm2;
+    ret->line = line;
     
     switch (type)
     {
@@ -205,23 +210,25 @@ comm* newComm(commType type, void* expr1, void* comm1, void* comm2) {
     return ret;
 }
 
-expr* newExpr(opType type, expr* expr1, expr* expr2, prim* prim1) {
+expr* newExpr(opType type, expr* expr1, expr* expr2, prim* prim1, int line) {
     expr* ret = safeMalloc(sizeof(expr));
     ret->type = type;
+    ret->line = line;
     if (prim1) ret->prim = prim1;
     else ret->expr1 = expr1;
     ret->expr2 = expr2;
     return ret;
 }
 
-expr* newExprFromID(char* id) {
-    prim* pr = newPrim(VAR, id, NULL, NULL, 0, 0);
-    return newExpr(PRIM_OPTYPE, NULL, NULL, pr);
+expr* newExprFromID(char* id, int line) {
+    prim* pr = newPrim(VAR, id, NULL, NULL, 0, 0, line);
+    return newExpr(PRIM_OPTYPE, NULL, NULL, pr, line);
 }
 
-exprList* allocExprs() {
+exprList* allocExprs(int line) {
     exprList* ret = safeMalloc(sizeof(exprList));
     ret->count = 0;
+    ret->line = line;
     ret->expr = safeMalloc(0);
     return ret;
 }
@@ -232,10 +239,11 @@ exprList* stackExpr(exprList* in, expr* _expr) {
     return in;
 }
 
-prim* newPrim(primType type, char * id, exprList* param, expr* _expr, int num, char c) {
+prim* newPrim(primType type, char * id, exprList* param, expr* _expr, int num, char c, int line) {
     prim* ret = safeMalloc(sizeof(prim));
     char * newStr;
     ret->type = type;
+    ret->line = line;
     switch (type)
     {
     case FUNC_CALL:
@@ -243,7 +251,6 @@ prim* newPrim(primType type, char * id, exprList* param, expr* _expr, int num, c
     case VAR:
         newStr = safeCalloc(strlen(id) + 1, sizeof(char));
         strcpy(newStr, id);
-        ret->name = newStr;
         ret->name = newStr;
         break;
     case CAR_CONST:
@@ -460,10 +467,12 @@ void printExprList(exprList* exL) {
         printf("No params.\n");
         return;
     }
+    printf("Param list:\n");
     for (int i = 0; i < exL->count; i++) {
         expr* cexpr = exL->expr[i];
         printExpr(cexpr);
     }
+    printf("End of param list.\n");
 }
 
 void printProg() {
@@ -476,12 +485,13 @@ void printProg() {
     if (gfuncs->count) {
         for (int i = 0; i < gfuncs->count; i++) {
             func* cfunc = gfuncs->func[i];
-            printf("%s %s\n", (cfunc->type)?("Car"):("Int"), cfunc->id);
+            printf("Function %s %s\n", (cfunc->type)?("Car"):("Int"), cfunc->id);
             if (cfunc->params) {
+                printf("Params %d:\n", cfunc->params->count);
                 for (int j = 0; j < cfunc->params->count; j++) {
                     param* cparam = cfunc->params->param[j];
                     printf("%s: %s", (cparam->type)?("Car"):("Int"), cparam->id);
-                    if (j == cfunc->params->count - 1) printf(")\n");
+                    if (j == cfunc->params->count - 1) printf("\n");
                     else printf(", ");
                 }
             }

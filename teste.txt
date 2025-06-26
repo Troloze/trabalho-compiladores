@@ -1,32 +1,26 @@
-int a, b, c;
-car d, e, f;
+int a;
 
-int g() {
-    retorne 10;
+int f1 (
+    car d, 
+    int cad,
+    car b
+) {
+    se (d == b) entao se (cad > 10) entao retorne 1;
+    senao retorne 2;
 }
 
-int h(int a, car b) {
-    int d;
-    se ( b != e ) entao {
-        d = a;
-    } senao {
-        d = g();
-    }
-    retorne d;
+car f2() {
+    retorne 0;
 }
 
 programa{
-    int a, c;
-    car f, i, k;
-    e = 'a';
-    c = 0;
-    enquanto ( h(0, f) != 10 ) execute {
-        leia f;
-        c = c + 1;
-    } 
-    escreva "Voce usou "; 
-    escreva c; 
-    escreva " tentativas para adivinhar o valor.";
+    int b;
+    int cr;
+    car d;
+    a = 
+    b = 
+    cr =
+    (d == 10);
     retorne 0;
 }
 
