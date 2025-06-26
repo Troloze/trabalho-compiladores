@@ -1,7 +1,7 @@
 #include "main.h"
 
 int is_error = 0;   /* Irá mudar para 1 em caso de erro no parsing */
-FILE * yyin;        /* Variavel utilizada por yylex como arquivo de entrada*/
+extern FILE * yyin;        /* Variavel utilizada por yylex como arquivo de entrada*/
 
 int main(int argc, char** argv){
      int err = 0;

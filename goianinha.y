@@ -141,7 +141,7 @@ commandList:
 ;
 
 command: 
-      SEMICOLON {$$ = NULL}
+      SEMICOLON {$$ = NULL;}
     | expr SEMICOLON {$$ = newComm(BASE_COMM, $1, NULL, NULL, yylineno);}
     | RETURN expr SEMICOLON {$$ = newComm(RETURN_COMM, $2, NULL, NULL, yylineno);}
     | READ ID SEMICOLON {$$ = newComm(READ_COMM, $2, NULL, NULL, yylineno);}
@@ -166,13 +166,13 @@ orExpr:
 
 andExpr:
       andExpr AND_OP eqExpr {$$ = newExpr(AND_OPTYPE, $1, $3, NULL, yylineno);}
-    | eqExpr {$$ = $1}
+    | eqExpr {$$ = $1;}
 ;
 
 eqExpr:
       eqExpr COMP_EQ desigExpr {$$ = newExpr(EQ_OPTYPE, $1, $3, NULL, yylineno);}
     | eqExpr COMP_NE desigExpr {$$ = newExpr(NEQ_OPTYPE, $1, $3, NULL, yylineno);}
-    | desigExpr {$$ = $1}
+    | desigExpr {$$ = $1;}
 ;
 
 desigExpr:
@@ -180,25 +180,25 @@ desigExpr:
     | desigExpr COMP_GT addExpr {$$ = newExpr(GT_OPTYPE, $1, $3, NULL, yylineno);}
     | desigExpr COMP_LE addExpr {$$ = newExpr(LE_OPTYPE, $1, $3, NULL, yylineno);}
     | desigExpr COMP_GE addExpr {$$ = newExpr(GE_OPTYPE, $1, $3, NULL, yylineno);}
-    | addExpr {$$ = $1}
+    | addExpr {$$ = $1;}
 ;
 
 addExpr:
       addExpr PLUS_SIGN multExpr {$$ = newExpr(ADD_OPTYPE, $1, $3, NULL, yylineno);}
     | addExpr MINUS_SIGN multExpr {$$ = newExpr(SUB_OPTYPE, $1, $3, NULL, yylineno);}
-    | multExpr {$$ = $1} 
+    | multExpr {$$ = $1;} 
 ;
 
 multExpr:
       multExpr MULT_SIGN unitExpr {$$ = newExpr(MULT_OPTYPE, $1, $3, NULL, yylineno);}
     | multExpr DIV_SIGN unitExpr {$$ = newExpr(DIV_OPTYPE, $1, $3, NULL, yylineno);}
-    | unitExpr {$$ = $1}
+    | unitExpr {$$ = $1;}
 ;
 
 unitExpr:
       MINUS_SIGN primExpr {$$ = newExpr(NEG_OPTYPE, NULL, NULL, $2, yylineno);}
     | NOT_OP primExpr {$$ = newExpr(NOT_OPTYPE, NULL, NULL, $2, yylineno);}
-    | primExpr {$$ = newExpr(PRIM_OPTYPE, NULL, NULL, $1, yylineno)}
+    | primExpr {$$ = newExpr(PRIM_OPTYPE, NULL, NULL, $1, yylineno);}
 ;
 
 primExpr: 

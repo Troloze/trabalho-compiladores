@@ -4,6 +4,8 @@
         "translator.h": "c",
         "string.h": "c",
         "semantic.h": "c",
-        "stack.h": "c"
+        "stack.h": "c",
+        "main.h": "c",
+        "stdio.h": "c"
     }
 }

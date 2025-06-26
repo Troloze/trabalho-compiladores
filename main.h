@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "abstree.h"
 #include "semantic.h"
-#include "translator.h"
 #include "goianinha.tab.h"
 /* Incluir externs do flex */
 extern int yylex();
