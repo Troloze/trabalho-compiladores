@@ -103,7 +103,7 @@ int analyzePrim(contextStack * stack, prim * p, int * typeOut, func * f) {
         *typeOut = 0;   // int
         return 0; 
     case PAR_EXPR:
-        if (isPrint) printf("Par expr\n", p->cValue);
+        if (isPrint) printf("Par expr\n");
         return analyzeExpr(stack, p->expr, typeOut, f);
     }
     return 0;
